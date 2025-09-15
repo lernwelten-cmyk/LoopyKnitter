@@ -90,6 +90,113 @@
     </div>
   </div>
 
+  <!-- Bottom Navigation -->
+  <div class="bottom-navigation">
+    <button id="videosButton" class="nav-button" aria-label="Videos anzeigen">
+      <span class="nav-icon">🎥</span>
+      <span class="nav-label">Videos</span>
+    </button>
+  </div>
+
+  <!-- Bottom Sheet for Videos -->
+  <div id="videosBottomSheet" class="bottom-sheet" aria-hidden="true">
+    <div class="bottom-sheet-backdrop"></div>
+    <div class="bottom-sheet-content">
+      <div class="bottom-sheet-header">
+        <h2>YouTube Videos</h2>
+        <button id="closeBottomSheet" class="close-button" aria-label="Videos schließen">✕</button>
+      </div>
+      <div class="bottom-sheet-body">
+        <div id="videosList" class="videos-list">
+          <div class="empty-videos-state">
+            <span class="empty-icon">🎬</span>
+            <p>Noch keine Videos gespeichert</p>
+            <p class="empty-subtitle">Füge YouTube-Videos zu deinen Strickprojekten hinzu</p>
+          </div>
+        </div>
+      </div>
+      <button id="addVideoFab" class="fab" aria-label="Video hinzufügen">
+        <span class="fab-icon">➕</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Video Player Modal -->
+  <div id="videoPlayerModal" class="modal" aria-hidden="true">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content video-modal">
+      <div class="modal-header">
+        <h3 id="videoPlayerTitle">Video</h3>
+        <button id="closeVideoPlayer" class="close-button" aria-label="Video schließen">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="video-container">
+          <iframe
+            id="videoPlayerFrame"
+            src=""
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen
+          ></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Video Dialog -->
+  <div id="addVideoDialog" class="modal" aria-hidden="true">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content dialog">
+      <div class="modal-header">
+        <h3>Video hinzufügen</h3>
+        <button id="closeAddVideoDialog" class="close-button" aria-label="Dialog schließen">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="addVideoForm">
+          <div class="form-group">
+            <label for="videoUrl">YouTube-Link:</label>
+            <input
+              type="url"
+              id="videoUrl"
+              class="form-input"
+              placeholder="https://www.youtube.com/watch?v=..."
+              aria-describedby="urlHelp"
+              required
+            >
+            <div id="urlHelp" class="form-help">Unterstützt: youtube.com, youtu.be, youtube.com/shorts</div>
+            <div id="urlError" class="form-error" aria-live="polite"></div>
+          </div>
+          <div class="form-group">
+            <label for="videoTitle">Titel (optional):</label>
+            <input
+              type="text"
+              id="videoTitle"
+              class="form-input"
+              placeholder="Mein Strick-Tutorial"
+            >
+          </div>
+          <div class="form-group">
+            <label for="videoProjects">Projekte zuordnen (optional):</label>
+            <select id="videoProjects" class="form-select" multiple>
+              <!-- Wird dynamisch gefüllt -->
+            </select>
+            <div class="form-help">Mehrfachauswahl mit Strg/Cmd möglich</div>
+          </div>
+          <div class="form-actions">
+            <button type="button" id="cancelAddVideo" class="button secondary">Abbrechen</button>
+            <button type="submit" id="saveVideo" class="button primary">Speichern</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Snackbar for notifications -->
+  <div id="snackbar" class="snackbar" aria-live="polite">
+    <span id="snackbarMessage"></span>
+    <button id="snackbarAction" class="snackbar-action" style="display: none;"></button>
+  </div>
+
   <audio id="finishSound">
     <source src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg" type="audio/ogg">
   </audio>
