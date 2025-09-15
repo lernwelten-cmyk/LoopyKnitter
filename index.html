@@ -52,12 +52,42 @@
     }
 
     #addButton {
-      background: #ab47bc;
+      background: #4CAF50;
       color: white;
+      width: 160px;
+      height: 160px;
+      min-width: 160px;
+      min-height: 160px;
+      border-radius: 50%;
+      font-size: 4em;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 1em auto;
+      padding: 0;
+      box-sizing: border-box;
+      line-height: 1;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+      transition: all 0.3s ease;
     }
 
-    #addButton:hover {
-      background: #8e24aa;
+    #addButton:hover:not(.disabled) {
+      background: #45a049;
+      transform: scale(1.05);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+    }
+
+    #addButton.disabled {
+      background: #f44336;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    #addButton.disabled:hover {
+      background: #f44336;
+      transform: none;
     }
 
     #newProject {
@@ -98,7 +128,7 @@
     <input type="number" id="stepInput" value="10" min="1">
   </label>
   <br>
-  <button id="addButton">+ Reihen hinzufügen</button>
+  <button id="addButton">+</button>
   <button id="resetButton">Projekt zurücksetzen</button>
   <button id="newProject">Neues Projekt anlegen</button>
 
@@ -143,9 +173,20 @@
     function updateDisplay() {
       if (!currentProject) return;
       const proj = projects[currentProject];
+      const addButton = document.getElementById("addButton");
+
       document.getElementById("count").textContent = proj.count;
       document.getElementById("goalInfo").textContent = `Ziel: ${proj.goal} Reihen`;
       document.getElementById("finishedMessage").textContent = proj.count >= proj.goal ? "✅ Projekt abgeschlossen!" : "";
+
+      // Button-Status aktualisieren
+      if (proj.count >= proj.goal) {
+        addButton.classList.add("disabled");
+        addButton.disabled = true;
+      } else {
+        addButton.classList.remove("disabled");
+        addButton.disabled = false;
+      }
     }
 
     document.getElementById("projectSelect").addEventListener("change", (e) => {
@@ -155,12 +196,18 @@
 
     document.getElementById("addButton").addEventListener("click", () => {
       if (!currentProject) return;
-      const step = parseInt(document.getElementById("stepInput").value) || 1;
       const proj = projects[currentProject];
+
+      // Prüfen ob Ziel bereits erreicht
+      if (proj.count >= proj.goal) return;
+
+      const step = parseInt(document.getElementById("stepInput").value) || 1;
       proj.count += step;
+
       if (proj.count >= proj.goal) {
         document.getElementById("finishSound").play();
       }
+
       saveProjects();
       updateDisplay();
     });
