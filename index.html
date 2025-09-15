@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Strickprojekt Zähler</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="LoopyKnitter">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="theme-color" content="#007AFF">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f7f4f0;
+      margin: 0;
+      padding: 2em;
+    }
+
+    h1 {
+      color: #444;
+    }
+
+    #projectSelect {
+      margin: 1em;
+      padding: 0.5em;
+      font-size: 1em;
+    }
+
+    #count {
+      font-size: 3em;
+      margin: 1em 0;
+      color: #6a1b9a;
+    }
+
+    input {
+      padding: 0.5em;
+      font-size: 1em;
+      text-align: center;
+    }
+
+    button {
+      margin: 0.5em;
+      padding: 1em 2em;
+      font-size: 1.2em;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    #addButton {
+      background: #ab47bc;
+      color: white;
+    }
+
+    #addButton:hover {
+      background: #8e24aa;
+    }
+
+    #newProject {
+      background: #29b6f6;
+      color: white;
+    }
+
+    #newProject:hover {
+      background: #0288d1;
+    }
+
+    #resetButton {
+      background: #ef5350;
+      color: white;
+    }
+
+    #resetButton:hover {
+      background: #c62828;
+    }
+
+    .finished {
+      color: green;
+      font-weight: bold;
+      font-size: 1.5em;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧶 Strickprojekt Zähler</h1>
+
+  <label for="projectSelect">Projekt wählen:</label>
+  <select id="projectSelect"></select>
+
+  <div id="count">0</div>
+
+  <label>
+    Reihen pro Klick:
+    <input type="number" id="stepInput" value="10" min="1">
+  </label>
+  <br>
+  <button id="addButton">+ Reihen hinzufügen</button>
+  <button id="resetButton">Projekt zurücksetzen</button>
+  <button id="newProject">Neues Projekt anlegen</button>
+
+  <p id="goalInfo"></p>
+  <p id="finishedMessage" class="finished"></p>
+
+  <audio id="finishSound">
+    <source src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg" type="audio/ogg">
+  </audio>
+
+  <script>
+    let projects = {};
+    let currentProject = null;
+
+    // Daten aus localStorage laden
+    if (localStorage.getItem("knitProjects")) {
+      projects = JSON.parse(localStorage.getItem("knitProjects"));
+    }
+
+    function saveProjects() {
+      localStorage.setItem("knitProjects", JSON.stringify(projects));
+    }
+
+    function updateProjectList() {
+      const select = document.getElementById("projectSelect");
+      select.innerHTML = "";
+      for (let name in projects) {
+        const option = document.createElement("option");
+        option.value = name;
+        option.textContent = name;
+        select.appendChild(option);
+      }
+      if (currentProject && projects[currentProject]) {
+        select.value = currentProject;
+      } else if (Object.keys(projects).length > 0) {
+        currentProject = Object.keys(projects)[0];
+        select.value = currentProject;
+      }
+      updateDisplay();
+    }
+
+    function updateDisplay() {
+      if (!currentProject) return;
+      const proj = projects[currentProject];
+      document.getElementById("count").textContent = proj.count;
+      document.getElementById("goalInfo").textContent = `Ziel: ${proj.goal} Reihen`;
+      document.getElementById("finishedMessage").textContent = proj.count >= proj.goal ? "✅ Projekt abgeschlossen!" : "";
+    }
+
+    document.getElementById("projectSelect").addEventListener("change", (e) => {
+      currentProject = e.target.value;
+      updateDisplay();
+    });
+
+    document.getElementById("addButton").addEventListener("click", () => {
+      if (!currentProject) return;
+      const step = parseInt(document.getElementById("stepInput").value) || 1;
+      const proj = projects[currentProject];
+      proj.count += step;
+      if (proj.count >= proj.goal) {
+        document.getElementById("finishSound").play();
+      }
+      saveProjects();
+      updateDisplay();
+    });
+
+    document.getElementById("resetButton").addEventListener("click", () => {
+      if (!currentProject) return;
+      if (confirm("Fortschritt wirklich zurücksetzen?")) {
+        projects[currentProject].count = 0;
+        saveProjects();
+        updateDisplay();
+      }
+    });
+
+    document.getElementById("newProject").addEventListener("click", () => {
+      const name = prompt("Name des neuen Projekts?");
+      if (!name) return;
+      const goal = parseInt(prompt("Maximale Reihenanzahl für dieses Projekt?")) || 100;
+      projects[name] = { count: 0, goal: goal };
+      currentProject = name;
+      saveProjects();
+      updateProjectList();
+    });
+
+    // Initialisieren
+    updateProjectList();
+
+    // Service Worker registrieren
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then((registration) => {
+            console.log('SW registered: ', registration);
+          })
+          .catch((registrationError) => {
+            console.log('SW registration failed: ', registrationError);
+          });
+      });
+    }
+  </script>
+</body>
+</html>
